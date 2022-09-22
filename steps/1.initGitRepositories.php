@@ -12,13 +12,19 @@ return function($args, &$context) {
 
 		fwrite(STDERR, "Initializing git repository '$repo_colored'\n");
 
-		napphp::proc_changeWorkingDirectory("$git_repositories_dir/$git_repository", function() use ($git_repository, $git_local_config) {
+		napphp::proc_changeWorkingDirectory("$git_repositories_dir/$git_repository", function() use (&$context, $git_repository, $git_local_config) {
+			$github_push_key = $context["secrets"]["keys"]["github_push"]."/id_rsa";
+			$github_push_key = escapeshellarg($github_push_key);
+
 			napphp::shell_execute(
 				"git", [
 					"args" => [
 						"clone",
 						"git@github.com:$git_repository.git",
 						"."
+					],
+					"env" => [
+						"GIT_SSH_COMMAND" => "ssh -i $github_push_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 					]
 				]
 			);
