@@ -1,30 +1,45 @@
 <?php
 
-function swRelease_check_checkSSHKeyPair($ssh_key_dir) {
+function swRelease_init_checkSSHPrivateKey($ssh_key_dir) {
 	fwrite(STDERR, "Checking SSH-Key @ $ssh_key_dir\n");
 
 	$private_key_path = "$ssh_key_dir/id_rsa";
-	//$public_key_path  = "$ssh_key_dir/id_rsa.pub";
 
 	if (!napphp::fs_isAFile($private_key_path)) {
 		throw new Exception("Private key '$private_key_path': not found.");
 	}
 
 	$private_key_mode = napphp::fs_getFileMode($private_key_path);
-//	$public_key_mode  = napphp::fs_getFileMode($public_key_path);
 
 	if ($private_key_mode !== 0600) {
 		$actual = decoct($private_key_mode);
 
 		throw new Exception("Private key '$private_key_path': wrong file mode (actual: $actual, required: 0600).");
-	} /*else if ($public_key_mode !== 0644) {
-		$actual = decoct($public_key_mode);
-
-		throw new Exception("Public key '$public_key_path': wrong file mode (actual: $actual, required: 0644).");
-	}*/
+	}
 
 	fwrite(STDERR, "$private_key_path: ok\n");
-	//fwrite(STDERR, "$public_key_path: ok\n");
+}
+
+function swRelease_init_createSSHPublicKey($ssh_key_dir) {
+	fwrite(STDERR, "Creating public SSH-Key of '$ssh_key_dir'\n");
+
+	$private_key_path = "$ssh_key_dir/id_rsa";
+	$public_key_path  = "$ssh_key_dir/id_rsa.pub";
+
+	napphp::shell_execute(
+		"ssh-keygen", [
+			"args" => [
+				"-y",
+				"-f",
+				$private_key_path
+			],
+			"stdout" => $public_key_path
+		]
+	);
+
+	napphp::fs_setFileMode($public_key_path, 0644);
+
+	fwrite(STDERR, "Created '$public_key_path'\n");
 }
 
 return function($args, &$context) {
@@ -61,7 +76,8 @@ return function($args, &$context) {
 	}
 
 	foreach ($context["secrets"]["keys"] as $ssh_key_dir) {
-		swRelease_check_checkSSHKeyPair($ssh_key_dir);
+		swRelease_init_checkSSHPrivateKey($ssh_key_dir);
+		swRelease_init_createSSHPublicKey($ssh_key_dir);
 	}
 
 	$context["secrets"]["github_access_token"] = napphp::fs_readFileString(
