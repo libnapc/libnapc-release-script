@@ -80,7 +80,7 @@ return function($args, &$context) {
 		swRelease_init_createSSHPublicKey($ssh_key_dir);
 	}
 
-	$context["secrets"]["github_access_token"] = napphp::fs_readFileString(
+	$context["secrets"]["github_access_token"] = trim(napphp::fs_readFileString(
 		$context["secrets"]["github_access_token"]
-	);
+	));
 };
