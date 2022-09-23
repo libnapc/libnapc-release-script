@@ -1,6 +1,12 @@
 <?php
 
 return function($args, &$context) {
+	if ($context["dry_run"]) {
+		fwrite(STDERR, "Skipping setting default branches because of --dry-run\n");
+
+		return;
+	}
+
 	$git_repositories = $context["git_repositories"];
 	$libnapc_version = $context["release_version"];
 
