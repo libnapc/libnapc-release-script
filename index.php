@@ -42,8 +42,8 @@ try {
 		],
 
 		"git_local_config" => [
-			"user.email"      => "github-bot@nap.software",
-			"user.name"       => "NAP-Software (bot)",
+			"user.email"      => "libnapc-bot@nap.software",
+			"user.name"       => "libnapc (bot)",
 			"gpg.format"      => "ssh",
 			"user.signingkey" => LIBNAPC_PROJECT_ROOT_DIR."/.secrets/keys/commit_signing/id_rsa",
 			"core.sshCommand" => "ssh -i ".escapeshellarg(LIBNAPC_PROJECT_ROOT_DIR."/.secrets/keys/github_push/id_rsa")
